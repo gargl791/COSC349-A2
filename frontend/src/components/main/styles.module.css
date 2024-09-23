@@ -1,0 +1,253 @@
+:root {
+    --primary-color: #3bb19b;
+    --secondary-color: #edf5f3;
+    --text-dark: #333;
+    --text-light: #666;
+    --background: #f5f5f5;
+    --white: #ffffff;
+}
+
+body, html {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background);
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.mainContainer {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background-color: var(--primary-color);
+    color: var(--white);
+    width: 100vw;
+    position: fixed;
+    z-index: 2;
+}
+
+.navContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.contentContainer {
+    flex-grow: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.whiteBtn {
+    background-color: var(--white);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 20px;
+    padding: 12px 0;
+    width: 180px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.whiteBtn:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: var(--text-dark);
+    font-size: 40px;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+
+.heading {
+    margin-top: 100px;
+}
+
+.addTaskButton {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 20px;
+    padding: 12px 0;
+    width: 180px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 20px auto;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.addTaskButton:hover {
+    background-color: #34a08b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.taskList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.taskItem {
+    background-color: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 3px 3px -2px rgb(0 0 0 / 20%),
+                0 3px 4px 0px rgb(0 0 0 / 14%),
+                0 1px 8px 0px rgb(0 0 0 / 12%);
+    padding: 20px;
+    width: calc(33.333% - 20px);
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.taskItem:hover {
+    transform: translateY(-5px);
+    z-index: 1;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.taskItem h3 {
+    margin: 0 0 10px 0;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.taskItem p {
+    margin: 5px 0;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.taskButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.taskButtons .whiteBtn {
+    flex: 1;
+    margin: 0 5px;
+    padding: 8px 12px;
+    font-size: 12px;
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.taskButtons .whiteBtn:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* Modal styling */
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 3px 3px -2px rgb(0 0 0 / 20%),
+                0 3px 4px 0px rgb(0 0 0 / 14%),
+                0 1px 8px 0px rgb(0 0 0 / 12%);
+    z-index: 1000;
+    max-width: 400px;
+    width: 100%;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--secondary-color);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--text-dark);
+}
+
+.modalClose {
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.modalClose:hover {
+    color: var(--primary-color);
+}
+
+.modalBody input,
+.modalBody select {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 10px;
+    background-color: var(--secondary-color);
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.modalBody input:focus,
+.modalBody select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 15px;
+}
+
+.modalFooter .whiteBtn {
+    margin-left: 10px;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
