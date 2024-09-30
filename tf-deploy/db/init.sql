@@ -1,3 +1,7 @@
+CREATE DATABASE tdpostgresdb;
+
+\c tdpostgresdb
+
 -- Drop Tables if they exist
 DROP TABLE IF EXISTS tasks;
 DROP TABLE IF EXISTS categories;

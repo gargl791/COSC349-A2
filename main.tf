@@ -152,13 +152,20 @@ resource "aws_db_instance" "postgres_server" {
   engine               = "postgres"
   engine_version       = "16.3"
   instance_class       = "db.t4g.micro"
-  name                 = "tdpostgres"
+  name                 = "tdpostgresdb"
   username             = "postgres"
   password             = "postgres"
   parameter_group_name = "default.postgres16"
   skip_final_snapshot  = true
   publicly_accessible  = true
+
   vpc_security_group_ids = [aws_security_group.allow_postgres_rds.id]
+
+  init_file = file("${path.module}/db/init.sql")
+
+  tags = {
+    Name = "PostgreSQLServer"
+  }
 }
 
 output "todoey_frontend_ip" {
