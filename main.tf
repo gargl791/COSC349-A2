@@ -50,14 +50,14 @@ resource "aws_security_group" "allow_web" {
   }
 }
 
-resource "aws_security_group" "allow_mysql" {
-  name        = "allow_mysql"
-  description = "Allow inbound MySQL traffic"
+resource "aws_security_group" "allow_backend" {
+  name        = "allow_backend"
+  description = "Give backend a neighbor ec2 instance port from HTTP"
 
   ingress {
-    description = "MySQL from anywhere"
-    from_port   = 3306
-    to_port     = 3306
+    description = "Allow inbound traffic for backend"
+    from_port   = 81
+    to_port     = 81
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -70,40 +70,97 @@ resource "aws_security_group" "allow_mysql" {
   }
 }
 
-resource "aws_instance" "web_server" {
-  ami           = "ami-010e83f579f15bba0"
-  instance_type = "t2.micro"
-  key_name      = "cosc349-2024"
+resource "aws_security_group" "allow_postgres_rds" {
+  name        = "allow_postgres_rds"
+  description = "Allow inbound PostgreSQL traffic"
 
-  vpc_security_group_ids = [aws_security_group.allow_ssh.id,
-              aws_security_group.allow_web.id]
+  ingress {
+    description = "PostgreSQL from anywhere"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  user_data = templatefile("${path.module}/build-webserver-vm.tpl", { mysql_server_ip = aws_instance.mysql_server.private_ip })
-
-  tags = {
-    Name = "WebServer"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
-resource "aws_instance" "mysql_server" {
-  ami           = "ami-010e83f579f15bba0"
+resource "aws_instance" "td_frontend" {
+  ami           = "ami-0ebfd941bbafe70c6"
   instance_type = "t2.micro"
   key_name      = "cosc349-2024"
 
-  vpc_security_group_ids = [aws_security_group.allow_ssh.id,
-                aws_security_group.allow_mysql.id]
+  vpc_security_group_ids = [
+    aws_security_group.allow_ssh.id,
+    aws_security_group.allow_web.id
+  ]
 
-  user_data = templatefile("${path.module}/build-dbserver-vm.tpl", { })
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install docker -y
+    sudo systemctl start docker
+    sudo systemctl enable docker
+    sudo usermod -aG docker ec2-user
+  EOF
 
   tags = {
-    Name = "MySQLServer"
+    Name = "TodoeyFrontend"
   }
 }
 
-output "web_server_ip" {
-  value = aws_instance.web_server.public_ip
+resource "aws_instance" "td_backend" {
+  ami           = "ami-0ebfd941bbafe70c6"
+  instance_type = "t2.micro"
+  key_name      = "cosc349-2024"
+
+  vpc_security_group_ids = [
+    aws_security_group.allow_ssh.id,
+    aws_security_group.allow_web.id,
+    aws_security_group.allow_backend.id
+  ]
+
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install docker -y
+    sudo systemctl start docker
+    sudo systemctl enable docker
+    sudo usermod -aG docker ec2-user
+  EOF
+
+  tags = {
+    Name = "TodoeyBackend"
+  }
 }
 
-output "mysql_server_ip" {
-  value = aws_instance.mysql_server.public_ip
+resource "aws_db_instance" "postgres_server" {
+  allocated_storage    = 20
+  engine               = "postgres"
+  engine_version       = "16.3"
+  instance_class       = "db.t4g.micro"
+  name                 = "tdpostgres"
+  username             = "postgres"
+  password             = "postgres"
+  parameter_group_name = "default.postgres16"
+  skip_final_snapshot  = true
+  publicly_accessible  = true
+  vpc_security_group_ids = [aws_security_group.allow_postgres_rds.id]
+}
+
+output "todoey_frontend_ip" {
+  value = aws_instance.td_frontend.public_ip
+}
+
+output "todoey_backend_ip" {
+  value = aws_instance.td_backend.public_ip
+}
+
+output "postgres_server_ip" {
+  value = aws_instance.postgres_server.public_ip
 }
