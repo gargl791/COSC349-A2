@@ -107,6 +107,10 @@ resource "aws_instance" "td_frontend" {
     sudo systemctl start docker
     sudo systemctl enable docker
     sudo usermod -aG docker ec2-user
+    sudo cp -r ${path.module}/frontend .
+    cd frontend
+    sudo docker build -t ec2-frontend:v1.0 -f Dockerfile .
+    sudo docker run -d -p 80:5173 ec2-frontend:v1.0
   EOF
 
   tags = {
@@ -132,6 +136,10 @@ resource "aws_instance" "td_backend" {
     sudo systemctl start docker
     sudo systemctl enable docker
     sudo usermod -aG docker ec2-user
+    sudo cp -r ${path.module}/backend .
+    cd backend
+    sudo docker build -t ec2-backend:v1.0 -f Dockerfile .
+    sudo docker run -d -p 80:5173 ec2-backend:v1.0
   EOF
 
   tags = {
