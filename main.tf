@@ -139,7 +139,7 @@ resource "aws_instance" "td_backend" {
     sudo cp -r ${path.module}/backend .
     cd backend
     sudo docker build -t ec2-backend:v1.0 -f Dockerfile .
-    sudo docker run -d -p 80:5173 ec2-backend:v1.0
+    sudo docker run -d -p 81:3000 ec2-backend:v1.0
   EOF
 
   tags = {
