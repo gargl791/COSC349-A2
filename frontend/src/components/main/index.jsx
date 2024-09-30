@@ -6,7 +6,8 @@ import EditModal from './EditModal';
 import { formatDate } from "./FormatDate";
 
 const Main = () => {
-  const url = "http://localhost:3000/api/tasks";
+  const link = 'http://44.199.50.71:81/api/'
+  const url = link + "tasks";
   const userId = localStorage.getItem("userId");
   const [tasks, setTasks] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

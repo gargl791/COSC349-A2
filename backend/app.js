@@ -2,7 +2,7 @@ const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "http://3.231.190.173",
 };
 
 const port = 3000;
@@ -11,11 +11,14 @@ app.use(cors(corsOptions));
 app.use(express.json());
 // Database connection pool
 const pool = new Pool({
-  user: "root",
-  host: "db", // the service name of database in docker-compose.yml
-  database: "test_db",
-  password: "root",
+  user: "postgres",
+  host: "todoey-db-instance-1.czy9dqou6nsv.us-east-1.rds.amazonaws.com", // the service name of database in docker-compose.yml
+  database: "todoeydb",
+  password: "postgres",
   port: 5432, // Default PostgreSQL port
+  ssl: {
+    rejectUnauthorized: false, // Use true if you have a valid certificate
+  },
 });
 
 // Test the database connection

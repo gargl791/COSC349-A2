@@ -12,6 +12,7 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const link = 'http://44.199.50.71:81/api/'
 
   const handleChange = ({ currentTarget: input }) => {
     setData({ ...data, [input.name]: input.value });
@@ -20,7 +21,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = "http://localhost:3000/api/users";
+      const url = link + "users";
       const { data: res } = await axios.post(url, data);
       navigate("/login");
       console.log(res.message);

@@ -8,5 +8,5 @@ RUN npm install
 COPY . .
 
 ENV JWT_SECRET hello
-EXPOSE 3000
+EXPOSE 81
 CMD ["npm", "run", "dev"]
