@@ -100,6 +100,10 @@ resource "aws_instance" "td_frontend" {
     aws_security_group.allow_web.id
   ]
 
+  provisioner "local-exec" { command = "aws ec2 wait instance-status-ok --instance-ids ${self.id} --region=us-east-1"}
+
+  /*
+
   user_data = <<-EOF
     #!/bin/bash
     sudo yum update -y
@@ -113,12 +117,15 @@ resource "aws_instance" "td_frontend" {
     sudo docker run -d -p 80:5173 ec2-frontend:v1.0
   EOF
 
+  */
+
   tags = {
     Name = "TodoeyFrontend"
   }
 }
 
 resource "aws_instance" "td_backend" {
+  depends_on = [aws_db_instance.postgres_server]
   ami           = "ami-0ebfd941bbafe70c6"
   instance_type = "t2.micro"
   key_name      = "cosc349-2024"
@@ -128,7 +135,10 @@ resource "aws_instance" "td_backend" {
     aws_security_group.allow_web.id,
     aws_security_group.allow_backend.id
   ]
+  
+  provisioner "local-exec" { command = "aws ec2 wait instance-status-ok --instance-ids ${self.id} --region=us-east-1" }
 
+  /*
   user_data = <<-EOF
     #!/bin/bash
     sudo yum update -y
@@ -141,6 +151,7 @@ resource "aws_instance" "td_backend" {
     sudo docker build -t ec2-backend:v1.0 -f Dockerfile .
     sudo docker run -d -p 81:3000 ec2-backend:v1.0
   EOF
+  */
 
   tags = {
     Name = "TodoeyBackend"
@@ -152,7 +163,7 @@ resource "aws_db_instance" "postgres_server" {
   engine               = "postgres"
   engine_version       = "16.3"
   instance_class       = "db.t4g.micro"
-  name                 = "tdpostgresdb"
+  identifier           = "tdpostgresdb-instance"
   username             = "postgres"
   password             = "postgres"
   parameter_group_name = "default.postgres16"
@@ -161,10 +172,29 @@ resource "aws_db_instance" "postgres_server" {
 
   vpc_security_group_ids = [aws_security_group.allow_postgres_rds.id]
 
-  init_file = file("${path.module}/db/init.sql")
-
   tags = {
     Name = "PostgreSQLServer"
+  }
+}
+
+resource "null_resource" "setup_db" {
+  depends_on = [aws_db_instance.postgres_server]
+  provisioner "local-exec" {
+    command = "psql -h ${aws_db_instance.postgres_server.address} -p 5432 -U ${aws_db_instance.postgres_server.username} -f ${path.module}/db/init.sql"
+  }
+}
+
+resource "null_resource" "scp_frontend_files" {
+  depends_on = [aws_instance.td_frontend]
+  provisioner "local-exec" {
+    command = "scp -i /home/vagrant/cosc349-2024.pem -r ${path.module}/frontend ec2-user@${aws_instance.td_frontend.public_ip}:/home/ec2-user/"
+  }
+}
+
+resource "null_resource" "scp_backend_files" {
+  depends_on = [aws_instance.td_backend]
+  provisioner "local-exec" {
+    command = "scp -i /home/vagrant/cosc349-2024.pem -r ${path.module}/backend ec2-user@${aws_instance.td_backend.public_ip}:/home/ec2-user/"
   }
 }
 
@@ -177,5 +207,5 @@ output "todoey_backend_ip" {
 }
 
 output "postgres_server_ip" {
-  value = aws_instance.postgres_server.public_ip
+  value = aws_db_instance.postgres_server.address
 }
