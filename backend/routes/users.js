@@ -3,19 +3,43 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const saltRounds = 10;
 
-module.exports = (pool) => {
+module.exports = (pool, sns) => {
   // Create a new user
   router.post("/", async (req, res) => {
     const { username, email, password } = req.body;
     try {
       const salt = await bcrypt.genSalt(saltRounds);
       const password_hash = await bcrypt.hash(password, salt);
+
+      // Insert the new user into the database
       const newUser = await pool.query(
         "INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING *",
-        [username, email, password_hash],
+        [username, email, password_hash]
       );
-      res.json(newUser.rows[0]);
-      // res.status(201).json("User created successfully");
+
+      // Subscribe the user's email to the SNS topic
+      const subscribeParams = {
+        Protocol: "email", // Specify the protocol
+        TopicArn: "arn:aws:sns:us-east-1:242255234086:todoey-email", // Update with your SNS Topic ARN
+        Endpoint: email, // The user's email address
+      };
+
+      console.log(`Subscribing ${email} to SNS topic...`);
+      await sns.subscribe(subscribeParams).promise(); // Subscribe the user's email
+      console.log(`Subscription request sent to ${email}.`);
+
+      // After user creation, send a welcome email via SNS
+      const publishParams = {
+        Message: `Hello ${username}, welcome to our platform! Your account has been successfully created.`,
+        Subject: "Welcome to Our Platform",
+        TopicArn: "arn:aws:sns:us-east-1:242255234086:todoey-email", // Update with your SNS Topic ARN
+      };
+
+      console.log("Sending SNS notification...");
+      await sns.publish(publishParams).promise(); // Send the SNS message
+      console.log("SNS notification sent");
+
+      res.json(newUser.rows[0]); // Return the newly created user
     } catch (err) {
       console.error(err.message);
       res.status(500).json("Server Error");
