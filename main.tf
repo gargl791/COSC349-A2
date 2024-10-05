@@ -238,7 +238,7 @@ resource "null_resource" "scp_backend_files" {
       "echo PG_HOST=${aws_db_instance.postgres_server.address} >> /home/ec2-user/backend/.env",
       "echo PG_PORT=5432 >> /home/ec2-user/backend/.env",
       "echo PG_DB=tdpostgresdb >> /home/ec2-user/backend/.env",
-      "echo CORS_ORIGIN=http://${aws_instance.td_frontend.public_ip}:80 >> /home/ec2-user/backend/.env",
+      "echo CORS_ORIGIN=http://${aws_instance.td_frontend.public_ip} >> /home/ec2-user/backend/.env",
       "echo PORT=3000 >> /home/ec2-user/backend/.env",
 
       "cd backend && sudo docker build -t ec2-backend:v1.0 -f Dockerfile . && sudo docker run -d -p 81:3000 ec2-backend:v1.0"
