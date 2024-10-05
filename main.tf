@@ -189,12 +189,43 @@ resource "null_resource" "scp_frontend_files" {
   provisioner "local-exec" {
     command = "scp -i /home/vagrant/cosc349-2024.pem -r ${path.module}/frontend ec2-user@${aws_instance.td_frontend.public_ip}:/home/ec2-user/"
   }
+
+    provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      host        = aws_instance.td_frontend.public_ip
+      user        = "ec2-user"
+      private_key = file("/home/vagrant/cosc349-2024.pem")
+    }
+    
+    inline = [
+      "sudo yum update -y && sudo yum install docker -y",
+      "sudo systemctl start docker && sudo systemctl enable docker",
+      "cd frontend && sudo docker build -t ec2-frontend:v1.0 -f Dockerfile . && sudo docker run -d -p 80:5173 ec2-frontend:v1.0"
+    ]
+  }
 }
 
 resource "null_resource" "scp_backend_files" {
   depends_on = [aws_instance.td_backend]
   provisioner "local-exec" {
     command = "scp -i /home/vagrant/cosc349-2024.pem -r ${path.module}/backend ec2-user@${aws_instance.td_backend.public_ip}:/home/ec2-user/"
+  }
+
+    provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      host        = aws_instance.td_backend.public_ip
+      user        = "ec2-user"
+      private_key = file("/home/vagrant/cosc349-2024.pem")
+    }
+    
+    inline = [
+      "ls -l /home/ec2-user/backend", # Check if files were copied
+      "sudo yum update -y && sudo yum install docker -y",
+      "sudo systemctl start docker && sudo systemctl enable docker",
+      "cd backend && sudo docker build -t ec2-backend:v1.0 -f Dockerfile . && sudo docker run -d -p 81:3000 ec2-backend:v1.0"
+    ]
   }
 }
 
