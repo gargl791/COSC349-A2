@@ -3,15 +3,20 @@ const { Pool } = require("pg");
 const cors = require("cors");
 const AWS = require("aws-sdk"); // Add this line for AWS SDK
 
+require('dotenv').config()
+
+
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: process.env.CORS_ORIGIN,
 };
 process.env.AWS_SDK_LOAD_CONFIG = "1";
 
-const port = 3000;
+const port = parseInt(process.env.PORT, 10) || 3000;
+
 const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
+
 
 AWS.config.update({
   accessKeyId: "ASIATQZ4JQQTEDYSOIY3",
@@ -25,11 +30,11 @@ const sns = new AWS.SNS(); // Create SNS instance
 
 // Database connection pool
 const pool = new Pool({
-  user: "root",
-  host: "db", // the service name of the database in docker-compose.yml
-  database: "test_db",
-  password: "root",
-  port: 5432, // Default PostgreSQL port
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST, // the service name of the database in docker-compose.yml
+  database: process.env.PG_DB,
+  password: process.env.PG_PASSWORD,
+  port: parseInt(process.env.PG_PORT, 10) || 5432, // Default PostgreSQL port
 });
 
 // Test the database connection

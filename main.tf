@@ -180,14 +180,18 @@ resource "aws_db_instance" "postgres_server" {
 resource "null_resource" "setup_db" {
   depends_on = [aws_db_instance.postgres_server]
   provisioner "local-exec" {
+    environment = {
+      PGPASSWORD = aws_db_instance.postgres_server.password
+    }
     command = "psql -h ${aws_db_instance.postgres_server.address} -p 5432 -U ${aws_db_instance.postgres_server.username} -f ${path.module}/db/init.sql"
   }
 }
 
+
 resource "null_resource" "scp_frontend_files" {
   depends_on = [aws_instance.td_frontend]
   provisioner "local-exec" {
-    command = "scp -i /home/vagrant/cosc349-2024.pem -r ${path.module}/frontend ec2-user@${aws_instance.td_frontend.public_ip}:/home/ec2-user/"
+    command = "scp -o StrictHostKeyChecking=no -i /home/vagrant/cosc349-2024.pem -r ${path.module}/frontend ec2-user@${aws_instance.td_frontend.public_ip}:/home/ec2-user/"
   }
 
     provisioner "remote-exec" {
@@ -201,6 +205,10 @@ resource "null_resource" "scp_frontend_files" {
     inline = [
       "sudo yum update -y && sudo yum install docker -y",
       "sudo systemctl start docker && sudo systemctl enable docker",
+
+      /* This part will create .env files for frontend ec2 container, at the frontend container. */
+      "echo VITE_EXPRESS_BACKEND_URL=http://${aws_instance.td_backend.public_ip}:81 > /home/ec2-user/frontend/.env",
+
       "cd frontend && sudo docker build -t ec2-frontend:v1.0 -f Dockerfile . && sudo docker run -d -p 80:5173 ec2-frontend:v1.0"
     ]
   }
@@ -209,7 +217,7 @@ resource "null_resource" "scp_frontend_files" {
 resource "null_resource" "scp_backend_files" {
   depends_on = [aws_instance.td_backend]
   provisioner "local-exec" {
-    command = "scp -i /home/vagrant/cosc349-2024.pem -r ${path.module}/backend ec2-user@${aws_instance.td_backend.public_ip}:/home/ec2-user/"
+    command = "scp -o StrictHostKeyChecking=no -i /home/vagrant/cosc349-2024.pem -r ${path.module}/backend ec2-user@${aws_instance.td_backend.public_ip}:/home/ec2-user/"
   }
 
     provisioner "remote-exec" {
@@ -221,9 +229,18 @@ resource "null_resource" "scp_backend_files" {
     }
     
     inline = [
-      "ls -l /home/ec2-user/backend", # Check if files were copied
       "sudo yum update -y && sudo yum install docker -y",
       "sudo systemctl start docker && sudo systemctl enable docker",
+
+      /* This part will create .env files for backend ec2 container, at the backend container. */
+      "echo PG_USER=${aws_db_instance.postgres_server.username} > /home/ec2-user/backend/.env",
+      "echo PG_PASSWORD=${aws_db_instance.postgres_server.password} >> /home/ec2-user/backend/.env",
+      "echo PG_HOST=${aws_db_instance.postgres_server.address} >> /home/ec2-user/backend/.env",
+      "echo PG_PORT=5432 >> /home/ec2-user/backend/.env",
+      "echo PG_DB=tdpostgresdb >> /home/ec2-user/backend/.env",
+      "echo CORS_ORIGIN=http://${aws_instance.td_frontend.public_ip}:80 >> /home/ec2-user/backend/.env",
+      "echo PORT=3000 >> /home/ec2-user/backend/.env",
+
       "cd backend && sudo docker build -t ec2-backend:v1.0 -f Dockerfile . && sudo docker run -d -p 81:3000 ec2-backend:v1.0"
     ]
   }

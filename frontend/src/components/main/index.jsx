@@ -6,7 +6,7 @@ import EditModal from './EditModal';
 import { formatDate } from "./FormatDate";
 
 const Main = () => {
-  const link = 'http://44.199.50.71:81/api/'
+  const link = import.meta.env.VITE_EXPRESS_BACKEND_URL + "/api/";
   const url = link + "tasks";
   const userId = localStorage.getItem("userId");
   const [tasks, setTasks] = useState([]);

@@ -12,7 +12,7 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const link = 'http://44.199.50.71:81/api/'
+  const link = import.meta.env.VITE_EXPRESS_BACKEND_URL + "/api/";
 
   const handleChange = ({ currentTarget: input }) => {
     setData({ ...data, [input.name]: input.value });
