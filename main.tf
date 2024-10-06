@@ -251,7 +251,7 @@ output "todoey_frontend_ip" {
 }
 
 output "todoey_backend_ip" {
-  value = aws_instance.td_backend.public_ip
+  value = ${aws_instance.td_backend.public_ip}:81
 }
 
 output "postgres_server_ip" {

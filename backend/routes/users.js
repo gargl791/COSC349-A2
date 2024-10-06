@@ -17,28 +17,23 @@ module.exports = (pool, sns) => {
         [username, email, password_hash]
       );
 
-      // Subscribe the user's email to the SNS topic
+      console.log(`User ${email} created successfully.`)
+
       const subscribeParams = {
-        Protocol: "email", // Specify the protocol
-        TopicArn: "arn:aws:sns:us-east-1:242255234086:todoey-email", // Update with your SNS Topic ARN
-        Endpoint: email, // The user's email address
+        Protocol: "email",
+        TopicArn: process.env.TOPIC_ARN,
+        Endpoint: email,
+        Attributes: {
+          FilterPolicy: JSON.stringify({
+            EmailAddress: [email] // Filter policy for this user's email
+          })
+        }
       };
 
       console.log(`Subscribing ${email} to SNS topic...`);
       await sns.subscribe(subscribeParams).promise(); // Subscribe the user's email
       console.log(`Subscription request sent to ${email}.`);
-
-      // After user creation, send a welcome email via SNS
-      const publishParams = {
-        Message: `Hello ${username}, welcome to our platform! Your account has been successfully created.`,
-        Subject: "Welcome to Our Platform",
-        TopicArn: "arn:aws:sns:us-east-1:242255234086:todoey-email", // Update with your SNS Topic ARN
-      };
-
-      console.log("Sending SNS notification...");
-      await sns.publish(publishParams).promise(); // Send the SNS message
-      console.log("SNS notification sent");
-
+    
       res.json(newUser.rows[0]); // Return the newly created user
     } catch (err) {
       console.error(err.message);
@@ -73,6 +68,21 @@ module.exports = (pool, sns) => {
     } catch (err) {
       console.error(err.message);
       res.status(500).json("Server Error");
+    }
+  });
+
+  router.get('/:userId', async (req, res) => {
+    const { userId } = req.params;
+  
+    try {
+      const result = await pool.query('SELECT * FROM users WHERE user_id = $1', [userId]);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json({ error: 'Server error' });
     }
   });
 

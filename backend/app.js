@@ -19,13 +19,11 @@ const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
 
-
 AWS.config.update({
-  accessKeyId: "ASIATQZ4JQQTEDYSOIY3",
-  secretAccessKey: "5b50gMeFMUAVjIB7WpNH8rkkLoKHX8bBLslDcPR3",
-  sessionToken:
-    "IQoJb3JpZ2luX2VjEGkaCXVzLXdlc3QtMiJGMEQCIGS0a2iAfjaxXWH7ml1WdbQ69ADLLSdZhjm36Sp8SN6TAiAgUhSOyPWqyaQPq8kuGxppNtr1S44782y8zPhQdaCR9yqsAgiy//////////8BEAAaDDI0MjI1NTIzNDA4NiIMzfsrh/pO3gBSaMX8KoACUGCpCHJ82L/qnWw08LEtlyLhlHWdLaoGWgnUslCD/aiVGYXLdhlUm0M8SM3GeH7kpcSEnkp5BeUzdBvQIOOdVovkxp/MVTV4UkSjh5rCfdxIlhEsJxKjQ5YNXsMhAglVBNTI4CteJDfDEHOluGW+EnhI2bvTxNNBj1CG4y/bxy3PuNDHQ2Z/1PNcrKRhFVZ7TkVsxj9lCbHK1CnohNi6SUFDfbuiWKDbZKwNUXN29FXWx5hVgzOsl430FqRdXmdHdpr4jxnuOUXVwvXW0FknGmPs0Xm90uEZtL2ldiM5AZaBeN+tXV75s5G7H71iYsjNLYjdi7tpcN+/PJoiXp0g8TCQ1ve3BjqeAUnBhopgxtQIHcyM+k/5fIllyDZzY0azcBMNi76VTJpu0uf5KmRzHz8ZlCaSzekUkukYtVLU5b5uXBbs4gO2+AsXxQbnvJ+IlJdpEx+/HbVjOPlHjcomFKHOmRDujQU6MI1hvkew9aFqDxpJLrX0BU6iG8pgeb3NiekU4nCCYNbibhSRYoolIihobChJ+Ws5rmgQFLfPubWTqxrqSJiL",
-  region: "us-east-1", // Change to your AWS region
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  sessionToken: process.env.AWS_SESSION_TOKEN,
+  region: "us-east-1",
 });
 
 const sns = new AWS.SNS(); // Create SNS instance
@@ -36,9 +34,9 @@ const pool = new Pool({
   database: process.env.PG_DB,
   password: process.env.PG_PASSWORD,
   port: parseInt(process.env.PG_PORT, 10) || 5432,
-  ssl: {
-    rejectUnauthorized: false // Change to true if you have valid SSL certificates
-  }
+  // ssl: {
+  //   rejectUnauthorized: false // Change to true if you have valid SSL certificates
+  // }
 });
 
 // Test the database connection
@@ -63,7 +61,7 @@ const categoryRoutes = require("./routes/categories");
 
 // Use routes
 app.use("/api/users", userRoutes(pool, sns)); // Pass the sns instance here
-app.use("/api/tasks", taskRoutes(pool));
+app.use("/api/tasks", taskRoutes(pool, sns));
 app.use("/api/categories", categoryRoutes(pool));
 app.use("/api/auth", authRoutes(pool));
 
