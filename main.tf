@@ -125,7 +125,7 @@ resource "aws_instance" "td_frontend" {
 }
 
 resource "aws_instance" "td_backend" {
-  depends_on = [aws_db_instance.postgres_server]
+  depends_on = [aws_db_instance.postgres_server, aws_sns_topic.td_emails]
   ami           = "ami-0ebfd941bbafe70c6"
   instance_type = "t2.micro"
   key_name      = "cosc349-2024"
@@ -156,6 +156,11 @@ resource "aws_instance" "td_backend" {
   tags = {
     Name = "TodoeyBackend"
   }
+
+}
+
+resource "aws_sns_topic" "td_emails" {
+  name = "td-emails-topic"
 }
 
 resource "aws_db_instance" "postgres_server" {
@@ -216,8 +221,14 @@ resource "null_resource" "scp_frontend_files" {
 
 resource "null_resource" "scp_backend_files" {
   depends_on = [aws_instance.td_backend]
+
   provisioner "local-exec" {
     command = "scp -o StrictHostKeyChecking=no -i /home/vagrant/cosc349-2024.pem -r ${path.module}/backend ec2-user@${aws_instance.td_backend.public_ip}:/home/ec2-user/"
+  }
+
+  #This block will copy credentials from vagrant to ec2_backend instance
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -i /home/vagrant/cosc349-2024.pem /home/vagrant/.aws/credentials ec2-user@${aws_instance.td_backend.public_ip}:/home/ec2-user/backend/"
   }
 
     provisioner "remote-exec" {
@@ -240,6 +251,8 @@ resource "null_resource" "scp_backend_files" {
       "echo PG_DB=tdpostgresdb >> /home/ec2-user/backend/.env",
       "echo CORS_ORIGIN=http://${aws_instance.td_frontend.public_ip} >> /home/ec2-user/backend/.env",
       "echo PORT=3000 >> /home/ec2-user/backend/.env",
+      "echo TOPIC_ARN=${aws_sns_topic.td_emails.arn} >> /home/ec2-user/backend/.env",
+      "echo DIR_TO_AWS_CREDENTIALS=./credentials >> /home/ec2-user/backend/.env",
 
       "cd backend && sudo docker build -t ec2-backend:v1.0 -f Dockerfile . && sudo docker run -d -p 81:3000 ec2-backend:v1.0"
     ]
@@ -251,9 +264,13 @@ output "todoey_frontend_ip" {
 }
 
 output "todoey_backend_ip" {
-  value = ${aws_instance.td_backend.public_ip}:81
+  value = "${aws_instance.td_backend.public_ip}:81"
 }
 
 output "postgres_server_ip" {
   value = aws_db_instance.postgres_server.address
+}
+
+output "sns_topic_arn" {
+  value = aws_sns_topic.td_emails.arn
 }

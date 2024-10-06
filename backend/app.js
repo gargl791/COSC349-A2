@@ -11,21 +11,24 @@ const corsOptions = {
 };
 
 
-process.env.AWS_SDK_LOAD_CONFIG = "1";
-
 const port = parseInt(process.env.PORT, 10) || 3000;
 
 const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  sessionToken: process.env.AWS_SESSION_TOKEN,
-  region: "us-east-1",
+
+// Load credentials from the default profile
+AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: 'default' });
+
+// Alternatively, specify the path if the credentials are not in the default location
+AWS.config.credentials = new AWS.SharedIniFileCredentials({ 
+    filename: process.env.DIR_TO_AWS_CREDENTIALS 
 });
 
+AWS.config.update({
+    region: 'us-east-1'
+});
 const sns = new AWS.SNS(); // Create SNS instance
 
 const pool = new Pool({
@@ -34,9 +37,9 @@ const pool = new Pool({
   database: process.env.PG_DB,
   password: process.env.PG_PASSWORD,
   port: parseInt(process.env.PG_PORT, 10) || 5432,
-  // ssl: {
-  //   rejectUnauthorized: false // Change to true if you have valid SSL certificates
-  // }
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 // Test the database connection
