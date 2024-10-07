@@ -10,7 +10,7 @@ Required Dependencies:
 - Vagrant
 - AWS Account
 
-### Manual deployment:
+## Manual deployment:
 
 `git clone` the repository to a directory, and `cd COSC349-A2` to move into the repository.
 
@@ -86,3 +86,23 @@ then
 terraform destroy
 ```
 and type "yes" to the prompts to destroy.
+
+## Redeployment steps when AWS lab session stops or timer ends:
+
+The steps for redeploying the frontend and backend EC2 instances after the lab session ends, or when the EC2 instances are shut down are as follows:
+
+1) You will need to access the EC2 instance via ssh or by AWS' EC2 instance connect.
+2) After successful connection to the EC2 instances, run the commands:
+```
+cd frontend
+```
+or 
+```
+cd backend
+```
+depending on which EC2 instance you are in. Then run the "`redeploy.sh`" script to build and run the docker containers. Do this for both instances.
+```
+sudo ./redeploy.sh
+```
+
+Note: This will only work if the current instances are using Elastic IP Address (EIP), otherwise you will have to update backend and frontend's .env files in the EC2 instance SSH or instance connect, to match the newly generated IPv4s.
