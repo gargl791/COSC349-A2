@@ -7,57 +7,56 @@ We are developing a versatile, and user-friendly to-do list web application name
 
 Required Dependencies:
 
-- Docker
+- Vagrant
 
-#### Initialization:
+#### Manual deployment:
 
-`git clone` the repository to a directory, and `cd COSC349-A1` to move into the repository.
+`git clone` the repository to a directory, and `cd COSC349-A2` to move into the repository.
 
-Ensure the docker engine is running in order to build the necessary images.
+
 
 Open a terminal at the repository directory, and run 
 ```
-docker-compose up
+vagrant up
 ```
-After completion of the automated build process (by checking docker desktop containers or terminal), navigate to `http://localhost:5173` in a web browser to access the web application.
-
-#### For subsequent redeployments:
-
-In order to rebuild the three container images after making changes to the application code, enter:
+After completion of the vagrant VM, run
 ```
-docker-compose build
-```
-or
-```
-docker-compose up --build
-```
-to automatically start up after building.
-
-#### To stop and delete the containers:
-```
-docker-compose down
+vagrant ssh
 ```
 
-### Frontend Container:
-This container provides the user interface for the To-doey web application, allowing the users to interact with the application by creating, and managing their to-do tasks.
+now you need to have a .pem file obtained from AWS CLI, and name it "`cosc349-2024.pem`"
 
-Technology: React + Vite
+Place the .pem file in the root directory of the reposotiry, as it is a synced folder between your machine and vagrant VM. Run the command 
+```
+sudo cp /vagrant/cosc349-2024.pem /home/vagrant
+```
+To copy the .pem file, from the shared folder, into the VM for usage in Terraform.
+Now give it r/w privileges by running
+```
+sudo chmod 600 /home/vagrant/cosc349-2024.pem
+```
 
-Exposes `5173` to access the frontend. Type `http://localhost:5173` at a web browser to access the user interface.
+Now you will need to copy your credentials from AWS CLI to /.aws/credentials. You can do this by running
 
-### Backend Container
-This container serves as the API server for the To-doey web app. This handles requests from the frontend and interactions with the database.
+```
+cd home/vagrant
+```
+then 
 
-Technology: Node.js, Express.js
+```
+nano /.aws/credentials
+```
+and paste your details obtained from AWS CLI there and save.
 
-Exposes port `3000` to access the backend. `http://localhost:3000` is used to communicate with the backend. 
 
-### Database Container
-This container hosts the PostgreSQL databse which stores user info and their task data in a structured schema. Allowing for data persistence and easy querying.
 
-Technology: PostgreSQL
 
-You can connect to the database in the postgres docker terminal with the command: `psql -U root -d test_db`
 
-Architecture:
-![alt text](image.png)
+
+Now go to the shared folder directory by running
+
+```
+cd /vagrant/
+```
+
+Run `terraform init` then `terraform plan` and finally `terraform apply` typing yes for all
