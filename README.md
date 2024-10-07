@@ -25,9 +25,11 @@ After completion of the vagrant VM, run
 vagrant ssh
 ```
 
-now you need to have a .pem file obtained from AWS CLI, and name it "`cosc349-2024.pem`"
+Now you need to have a .pem file obtained from AWS. If you do not have one, create one, and ensure it is called "`cosc349-2024.pem`" as the terraform provisioning expects a .pem file with the name "`cosc349-2024`"
 
-Place the .pem file in the root directory of the repository, as it is a synced folder between your machine and vagrant VM. In vagrant SSH, run the command: 
+Place the .pem file in the root directory of the repository, as it is a synced folder between your machine and vagrant VM.
+
+Then in vagrant SSH, run the command: 
 ```
 sudo cp /vagrant/cosc349-2024.pem /home/vagrant
 ```
