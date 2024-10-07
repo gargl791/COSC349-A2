@@ -8,8 +8,9 @@ We are developing a versatile, and user-friendly to-do list web application name
 Required Dependencies:
 
 - Vagrant
+- AWS Account
 
-#### Manual deployment:
+### Manual deployment:
 
 `git clone` the repository to a directory, and `cd COSC349-A2` to move into the repository.
 
@@ -41,10 +42,10 @@ Now you will need to copy your credentials from AWS CLI to /.aws/credentials. Yo
 ```
 cd ~
 ```
-to ensure, you're in the correct directory, then 
+to ensure, you're isn the correct directory, then 
 
 ```
-nano /.aws/credentials
+nano .aws/credentials
 ```
 and paste your details obtained from AWS CLI there and save.
 
@@ -59,4 +60,27 @@ Now go to the shared folder directory by running
 cd /vagrant/
 ```
 
-Run `terraform init` then `terraform plan` and finally `terraform apply` typing yes for all
+Run `terraform init` then `terraform plan` and finally `terraform apply` typing yes.
+
+
+### Permission Denied Error
+
+If you come across a permission denied error, regarding the "cosc349-2024.pem" file, in vagrant ssh, you need to run 
+```
+sudo chown vagrant:vagrant /home/vagrant/cosc349-2024.pem
+```
+
+To change the ownership to the user "vagrant" in the vagrant VM
+
+### Cleaning up
+
+To clean up and destroy all instances, and security groups in AWS provisioned by Terraform, redirect to the vagrant shared folder.
+
+```
+cd /vagrant/
+```
+then
+```
+terraform destroy
+```
+and type "yes" to the prompts to destroy.
