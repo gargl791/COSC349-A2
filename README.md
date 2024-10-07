@@ -44,7 +44,7 @@ Now you will need to copy your credentials from AWS CLI to /.aws/credentials. Yo
 ```
 cd ~
 ```
-to ensure, you're isn the correct directory, then 
+to ensure, you're in the correct directory, then 
 
 ```
 nano .aws/credentials
