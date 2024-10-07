@@ -5,6 +5,14 @@
 
 We are developing a versatile, and user-friendly to-do list web application named To-doey. This application operates on three foundational Docker containers, each handling a specific task. The frontend container enables users to interact with the application, using React + Vite, such as creating to-do tasks. The backend container, built with Node.js and Express.js, manages the REST API. Lastly, the PostgreSQL database container stores user information and task data in a structured schema.
 
+### Application Architecture
+The application is structured:
+
+* Frontend: Uses React + Vite to display the user interface of Todoey
+* Backend: Uses Node.js and Express.js for the API calls.
+* RDS Database: Stores user, task data in a structured schema.
+* SNS Service: Emails the user during account creation, and when a task is created.
+
 Required Dependencies:
 
 - Vagrant
@@ -100,7 +108,15 @@ or
 ```
 cd backend
 ```
-depending on which EC2 instance you are in. Then run the "`redeploy.sh`" script to build and run the docker containers. Do this for both instances.
+depending on which EC2 instance you are in. 
+
+In the backend folder contains a credentials file that is copied to the EC2 instances during terraform provisioning. You may also have to replace its content with new AWS CLI details, depending on how long before the old credentials expire. Use the command
+```
+nano ./credentials
+```
+To access credentials and replace the content with new AWS CLI credentials. (The credentials is used for aws-sdk for SNS to work)
+
+Then run the "`redeploy.sh`" script to build and run the docker containers. Do this for both instances.
 ```
 sudo ./redeploy.sh
 ```
