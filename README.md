@@ -1,4 +1,4 @@
-# COSC349-A1
+# Todoey on the Cloud
 
 ### By Leon Chen & Glen Garcia
 
