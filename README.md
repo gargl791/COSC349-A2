@@ -26,7 +26,7 @@ vagrant ssh
 
 now you need to have a .pem file obtained from AWS CLI, and name it "`cosc349-2024.pem`"
 
-Place the .pem file in the root directory of the reposotiry, as it is a synced folder between your machine and vagrant VM. Run the command 
+Place the .pem file in the root directory of the repository, as it is a synced folder between your machine and vagrant VM. In vagrant SSH, run the command: 
 ```
 sudo cp /vagrant/cosc349-2024.pem /home/vagrant
 ```
@@ -39,9 +39,9 @@ sudo chmod 600 /home/vagrant/cosc349-2024.pem
 Now you will need to copy your credentials from AWS CLI to /.aws/credentials. You can do this by running
 
 ```
-cd home/vagrant
+cd ~
 ```
-then 
+to ensure, you're in the correct directory, then 
 
 ```
 nano /.aws/credentials
